@@ -17,9 +17,5 @@ export class CreateUserDto {
   ins_user: number; 
 
   @IsInt()
-  upd_user: number; 
-
-  @IsInt()
-  type: number; 
-
+  upd_user: number;
 }

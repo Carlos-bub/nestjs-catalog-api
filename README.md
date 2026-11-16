@@ -88,8 +88,7 @@ Exemplo de cadastro (`POST /users`):
   "email": "carlos@email.com",
   "password": "123456",
   "ins_user": 1,
-  "upd_user": 1,
-  "type": 1
+  "upd_user": 1
 }
 ```
 

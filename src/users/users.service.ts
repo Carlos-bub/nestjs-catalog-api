@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserRole } from './roles.enum';
 
 const USER_PUBLIC_SELECT = {
   id: true,
@@ -50,7 +51,7 @@ export class UsersService {
       );
     }
 
-    const payload = { id: user.id, email: user.email };
+    const payload = { id: user.id, email: user.email, type: user.type };
     const token = this.jwtService.sign(payload);
 
     return { token };
@@ -60,7 +61,11 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     try {
       return await this.prisma.appUser.create({
-        data: { ...createUserDto, password: hashedPassword },
+        data: {
+          ...createUserDto,
+          password: hashedPassword,
+          type: UserRole.USER,
+        },
         select: USER_PUBLIC_SELECT,
       });
     } catch (error) {
