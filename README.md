@@ -1,9 +1,9 @@
+# nestjs-catalog-api
 
-# Atividade Backend: Projeto NestJS - TypeScript - Prisma
-
-Este projeto consiste na implementação de um backend utilizando o framework **NestJS** com código fonte em **TypeScript** e o ORM **Prisma**. O modelo de banco de dados foi desenvolvido no **PostgreSQL** e a configuração foi feita para usar **Prisma**. Todo o projeto foi desenvolvido utilizando o **Visual Studio Code (VSCode)**. A atividade inclui a criação e implementação de rotas, conforme especificado na planilha anexa, e as operações de CRUD com base no modelo de banco de dados em anexo.
+API REST para gerenciamento de **usuários**, **categorias** e **produtos**, desenvolvida com **NestJS**, **TypeScript**, **Prisma ORM** e **PostgreSQL**, com autenticação baseada em **JWT** e validação de dados via `class-validator`.
 
 ## Autores
+
 - Carlos Henrique
 - Mateus Henrique
 - Rithiellen Kariny
@@ -11,72 +11,148 @@ Este projeto consiste na implementação de um backend utilizando o framework **
 
 ## Requisitos
 
-- Node.js ( v20.11.0 )
+- Node.js (v20+)
 - PostgreSQL
-- NestJS CLI
-- Prisma
-- Visual Studio Code (VSCode)
-- API Client (Postman)
+- Cliente HTTP (Postman, Insomnia, Thunder Client ou `curl`)
 
-## Configuração do Banco de Dados
+## Configuração do Ambiente e Banco de Dados
 
-1. Instale o **MySQL** localmente (localhost) ou configure um serviço de banco de dados remoto.
-2. Crie um banco de dados para o projeto.
-3. Atualize o arquivo `.env` na raiz do projeto com as seguintes configurações:
+1. Instale e inicie o **PostgreSQL** localmente (ou configure uma instância remota) e crie o banco de dados do projeto.
+2. Crie/atualize o arquivo `.env` na raiz do projeto com as variáveis:
 
-   ``"DATABASE_URL="postgresql://postgres:1234@localhost:5432/postgres"``
+   ```env
+   DATABASE_URL="postgresql://postgres:1234@localhost:5432/postgres"
+   JWT_SECRET="sua-chave-secreta-aqui"
+   ```
 
-4. Para rodar as migrations do banco de dados, utilize os comandos abaixo:
+3. Gere o Prisma Client e execute as migrations:
 
-   ``npx prisma migrate dev --name init``
+   ```bash
+   npx prisma generate
+   npx prisma migrate dev
+   ```
 
-## Como Executar o Projeto Nest
+## Como Executar
 
 1. Clone o repositório:
 
-   ``gh repo clone Carlos-bub/Mybackend``
+   ```bash
+   gh repo clone Carlos-bub/nestjs-catalog-api
+   cd nestjs-catalog-api
+   ```
 
-2. Abra o projeto no **VSCode**.
+2. Instale as dependências:
 
-3. Instale as dependências:
+   ```bash
+   npm install
+   ```
 
-   ``npm install``
+3. Rode as migrations (caso ainda não tenha rodado):
 
-4. Rode as migrations para configurar o banco de dados:
+   ```bash
+   npx prisma migrate dev
+   ```
 
-   ``npx prisma migrate dev``
+4. Inicie o servidor em modo de desenvolvimento:
 
-5. Execute o servidor:
+   ```bash
+   npm run start:dev
+   ```
 
-   ``npm run start:dev``
+   A API ficará disponível em `http://localhost:3000`.
 
-6. O servidor estará rodando localmente (localhost).
+## Autenticação e Rotas
 
-## Testando as Rotas
+A API utiliza autenticação via **Bearer Token (JWT)**.
 
-Recomendamos o uso do cliente API **Postman** dentro do **VSCode** para testar as rotas. Siga os seguintes passos:
+1. Crie um usuário em `POST /users`.
+2. Faça login em `POST /users/login` para receber `{ "token": "..." }`.
+3. Envie o header `Authorization: Bearer <token>` nas requisições para as rotas protegidas.
 
-1. Instale a extensão Postman no VSCode.
-2. Abra o projeto no VSCode e use o Postman para enviar requisições HTTP para as rotas definidas no projeto.
-3. Exemplo de rotas para testes:
-   - `GET /products` - Retorna todos os produtos.
-   - `POST /products` - Cria um novo produto (requer JSON no body).
-   - `PUT /products/:id` - Atualiza um produto por ID.
-   - `DELETE /products/:id` - Exclui um produto por ID.
+### Usuários (`/users`)
 
-As rotas são configuradas conforme a planilha anexa.
+| Método | Rota           | Auth | Descrição                          |
+| ------ | -------------- | ---- | ---------------------------------- |
+| POST   | `/users`       | Não  | Cadastra um novo usuário           |
+| POST   | `/users/login` | Não  | Autentica e retorna o token JWT    |
+| GET    | `/users`       | Sim  | Lista usuários (sem exibir senha)  |
+| GET    | `/users/:id`   | Sim  | Busca um usuário por ID            |
+| PUT    | `/users/:id`   | Sim  | Atualiza um usuário por ID         |
+| DELETE | `/users/:id`   | Sim  | Remove um usuário por ID           |
 
+Exemplo de cadastro (`POST /users`):
+
+```json
+{
+  "username": "carlos",
+  "email": "carlos@email.com",
+  "password": "123456",
+  "ins_user": 1,
+  "upd_user": 1,
+  "type": 1
+}
+```
+
+### Categorias (`/categories`)
+
+| Método | Rota              | Auth | Descrição                    |
+| ------ | ----------------- | ---- | ---------------------------- |
+| POST   | `/categories`     | Sim  | Cria uma nova categoria      |
+| GET    | `/categories`     | Sim  | Lista todas as categorias    |
+| GET    | `/categories/:id` | Sim  | Busca uma categoria por ID   |
+| PATCH  | `/categories/:id` | Sim  | Atualiza uma categoria       |
+| DELETE | `/categories/:id` | Sim  | Remove uma categoria         |
+
+Exemplo de criação (`POST /categories`):
+
+```json
+{
+  "name": "Bebidas"
+}
+```
+
+### Produtos (`/products`)
+
+| Método | Rota            | Auth | Descrição                  |
+| ------ | --------------- | ---- | -------------------------- |
+| POST   | `/products`     | Sim  | Cria um novo produto       |
+| GET    | `/products`     | Sim  | Lista todos os produtos    |
+| GET    | `/products/:id` | Sim  | Busca um produto por ID    |
+| PUT    | `/products/:id` | Sim  | Atualiza um produto por ID |
+| DELETE | `/products/:id` | Sim  | Remove um produto por ID   |
+
+Exemplo de criação (`POST /products`):
+
+```json
+{
+  "ean": "7891234567890",
+  "name": "Refrigerante",
+  "id_category": 1,
+  "ins_user": 1,
+  "upd_user": 1
+}
+```
 
 ## Comandos Úteis
 
-- Para acessar o Prisma Studio (interface para visualizar os dados no banco):
+- Visualizar o banco no Prisma Studio:
 
-   ``npx prisma studio``
+  ```bash
+  npx prisma studio
+  ```
 
-- Para rodar testes:
+- Compilar o projeto:
 
-   ``npm run test``
+  ```bash
+  npm run build
+  ```
+
+- Rodar os testes unitários:
+
+  ```bash
+  npm test
+  ```
 
 ## Considerações Finais
 
-Este projeto foi desenvolvido como parte da disciplina de Backend com NestJS, com foco em práticas modernas de desenvolvimento backend, utilizando **TypeScript**, **Prisma ORM** e **VSCode** como ambiente de desenvolvimento.
+Projeto desenvolvido inicialmente na disciplina de Backend com NestJS, utilizando **TypeScript**, **Prisma ORM** e **PostgreSQL**.
